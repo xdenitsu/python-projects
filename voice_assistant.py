@@ -15,9 +15,8 @@ def recognize_speech():
     try:
         print("Recognizing...")
         query = recognizer.recognize_google(audio)
-        return wikipedia.summary(query, sentences=3).lower()
+        return query
     except sr.UnknownValueError:
-        print("Sorry, I couldn't understand that.")
         return ""
     except sr.RequestError as e:
         print(f"Could not request results from Google Speech Recognition service; {e}")
@@ -31,6 +30,7 @@ def create_directory():
         speak(f"Directory '{user_input}' created successfully.")
     except Exception as e:
         speak(f"Sorry, I couldn't create a directory. {e}")
+        print(f"Sorry, I couldn't shutdown your computer. {e}")
 
 def shutdown_computer():
     try:
@@ -38,6 +38,7 @@ def shutdown_computer():
         os.system('shutdown now')
     except Exception as e:
         speak(f"Sorry, I couldn't shutdown your computer. {e}")
+        print(f"Sorry, I couldn't shutdown your computer. {e}")
 
 def reboot_computer():
     try:
@@ -45,9 +46,12 @@ def reboot_computer():
         os.system('reboot')
     except Exception as e:
         speak(f"Sorry, I couldn't shutdown your computer. {e}")
+        print(f"Sorry, I couldn't shutdown your computer. {e}")
 
 def speak(text):
     engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    engine.setProperty('voice', voices[6].id)
     engine.say(text)
     engine.runAndWait()
 
@@ -57,11 +61,14 @@ def assist(command):
     elif "wiki" in command:
         speak("Sure thing! What would you like to know?")
         result = recognize_speech()
-        speak(result)
+        response = wikipedia.summary(result, sentences=3)
+        speak(response)
     elif "create directory" in command:
         create_directory()
     elif "shutdown" in command:
         shutdown_computer()
+    elif "reboot" in command:
+        reboot_computer()
     elif "random" in command:
         random_number = random.randint(1, 6)
         speak(f"Your random number between 1 and 6 is {random_number}")
